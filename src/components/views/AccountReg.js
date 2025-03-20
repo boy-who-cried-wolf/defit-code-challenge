@@ -14,7 +14,7 @@ function AccountReg(props) {
   const [form] = Form.useForm();
   const [email, setEmail] = useState("");
   const [password,setPassword]=useState("");
-  const [verificationCode,setVerificationCode]=useState(0);
+  // const [verificationCode,setVerificationCode]=useState(0);
   const [inviteCode,setInviteCode]=useState(0);
   const [message,setMessage]=useState("");
   const[isValidated,setValidate]=useState(false);
@@ -35,6 +35,8 @@ function AccountReg(props) {
     console.log('Failed:', errorInfo);
   };
   const verifyEmail=()=>{
+    // Commented out email verification
+    /*
     return axios.post(serverUrl+"users/emailverify",{
       email: email,
       locale: (localStorage.getItem('locale') || "Mn")
@@ -42,47 +44,47 @@ function AccountReg(props) {
       if(response.data.response){
         openNotification(t('Success'),t("E-mail sent successfully"),true,false)
         setMessage({style:'text-green-500',val:1,data:t("E-mail successfully verified!")})
-
       }
       else{
         openNotification(t('Fail!'),t("E-mail not verified!"),false,false)
         setMessage({style:'text-red-500',val:0,data:t("E-mail not verified!")})
       }
     });
+    */
+    return Promise.resolve({data: {response: true}});
   }
   const register=()=>{
-    
-           form.validateFields()
-            .then((values) => {
-              console.log("validateFile")
-              axios.post(serverUrl+"users/signup",{
-                email:email,
-                email_verify:verificationCode,
-                password:password,
-                confirm_password:password,
-                country:props.country.title,
-                invite_code:inviteCode,
-                locale: (localStorage.getItem('locale') || "Mn")
-              }).then(response=>{
-                if(response.data.response){
-                  openNotification(t('Success'),t("Account successfully created!"),true,goMain)
-                  setMessage({style:'text-green-500',val:true,data:t("Account successfully created!")})
-                  localStorage.setItem("userInfo", JSON.stringify(response.data.data.userInfo));
-                  localStorage.setItem("jwtToken", JSON.stringify(response.data.data.token));
+    form.validateFields()
+      .then((values) => {
+        console.log("validateFile")
+        axios.post(serverUrl+"users/signup",{
+          email:email,
+          email_verify: "1234", // Temporary fixed verification code
+          password:password,
+          confirm_password:password,
+          country:props.country.title,
+          invite_code:inviteCode,
+          locale: (localStorage.getItem('locale') || "Mn")
+        }).then(response=>{
+          if(response.data.response){
+            openNotification(t('Success'),t("Account successfully created!"),true,goMain)
+            setMessage({style:'text-green-500',val:true,data:t("Account successfully created!")})
+            localStorage.setItem("userInfo", JSON.stringify(response.data.data.userInfo));
+            localStorage.setItem("jwtToken", JSON.stringify(response.data.data.token));
 
-                 if(response.data.data.keyPair){
-                    localStorage.setItem("privateKey",wallet.decrypt(response.data.data.keyPair[0].privateKey));
-                    localStorage.setItem("publicKey",JSON.stringify(response.data.data.keyPair[0].publicKey));
-                  }
-                } 
-                else{
-                  openNotification(t('Fail!'),response.data.message,false)
-                  setMessage({style:'text-red-500',val:false,data:t("Account failed!")})
-                }
-              })
+           if(response.data.data.keyPair){
+              localStorage.setItem("privateKey",wallet.decrypt(response.data.data.keyPair[0].privateKey));
+              localStorage.setItem("publicKey",JSON.stringify(response.data.data.keyPair[0].publicKey));
+            }
+          } 
+          else{
+            openNotification(t('Fail!'),response.data.message,false)
+            setMessage({style:'text-red-500',val:false,data:t("Account failed!")})
+          }
+        })
 
 
-            })
+      })
   
   }
 
@@ -122,6 +124,7 @@ function AccountReg(props) {
               className=" rounded-lg  bg-gray-200 text-black "
               onChange={(e)=>setEmail(e.target.value)}/>
             </Form.Item>
+            {/* Commented out email verification field
             <Form.Item
               name="Verification"
               rules={[
@@ -135,6 +138,7 @@ function AccountReg(props) {
               className="rounded-lg  bg-gray-200"
               onChange={(e)=>setVerificationCode(e.target.value)}/>
             </Form.Item>
+            */}
 
             <Form.Item
             validateTrigger = "onBlur"

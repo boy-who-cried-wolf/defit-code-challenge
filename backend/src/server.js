@@ -22,14 +22,23 @@ cron.schedule('*/10 * * * *', () => {
 const app = express();
 // Init environment
 dotenv.config();
+
+// CORS configuration
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
 // parse requests of content-type: application/json
 // parses incoming requests with JSON payloads
 app.use(express.json());
 app.use(cookieParser());
 // enabling cors for all requests by using cors middleware
-app.use(cors());
+app.use(cors(corsOptions));
 // Enable pre-flight
-app.options("*", cors());
+app.options("*", cors(corsOptions));
 app.use(
     session({
       key: "user_sid",

@@ -9,11 +9,11 @@ i18n.configure({
 module.exports = {
     deliverEmail: function (dest, subject, body) {
         var transport = nodemailer.createTransport({
-            service: process.env.EMAIL_SERVICE,
-            //host: process.env.EMAIL_HOST,
-            //port: Number(process.env.EMAIL_PORT),
+            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
             auth: {
-                //user: process.env.EMAIL_USER,
                 user: process.env.EMAIL,
                 pass: process.env.EMAIL_PWD
             }
@@ -28,7 +28,7 @@ module.exports = {
     
         transport.sendMail(mailOptions, function(error, info){
             if (error) {
-                console.log(error);
+                console.log('Email error:', error);
             } else {
                 console.log('Email sent: ' + info.response);
             }

@@ -4,8 +4,8 @@
   "description": "",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon"
+    "start": "set NODE_OPTIONS=--openssl-legacy-provider && node src/server.js",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider && nodemon"
   },
   "author": "Anatoli Miad",
   "license": "ISC",

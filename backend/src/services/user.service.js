@@ -240,27 +240,31 @@ class UserService {
     };
 
     static async signUp(rawData) {
+        console.log('Starting signup process for email:', rawData.email);
         const check = this.checkValidation(rawData);
         if (!check) {
+            console.log('Validation check failed');
             return {response:false, message:"Send data validation error", data:null}
         }
-        rawData.password = await this.hashPassword(rawData.password);
+        
+        console.log('Checking if email exists...');
         let checker = await UserModel.findOne({email:rawData.email});
+        console.log('Email check result:', checker ? 'Email exists' : 'Email does not exist');
+        
         if (checker) {
+            console.log('Email already in use:', rawData.email);
             return {response:false, message:"This Email already in use", data:null}
         }
-        //check email verification
-        let verifier = await EmailVerifyModel.findOne({email:rawData.email});
-        if (!verifier) {
-            return {response:false, message:"Please receive and resend the Email verification code.", data:null}
-        }
-        if (verifier.verify_code !== rawData.email_verify) {
-            return {response:false, message:"Email verification code is wrong.", data:null}
-        }
+        
+        console.log('Hashing password...');
+        rawData.password = await this.hashPassword(rawData.password);
+        
         //check invite code
         if (parseInt(rawData.invite_code) !== 0) {
+            console.log('Checking invite code:', rawData.invite_code);
             let inviter = await UserModel.findOne({id:parseInt(rawData.invite_code)});
             if (!inviter) {
+                console.log('Invalid invite code');
                 return {response:false, message:"Invite code wrong", data:null}
             }
         }
@@ -270,20 +274,22 @@ class UserService {
         rawData.get_bnb = false;
         const { confirm_password, email_verify, ...registerData } = rawData;
 
+        console.log('Creating user with data:', { ...registerData, password: '[HIDDEN]' });
         const result = await UserModel.create(registerData);
 
         if (!result) {
+            console.log('Failed to create user');
             return {response:false, message:"An error was caused during user registeration.", data:null}
         }
         if (result.error) {
+            console.log('Database error:', result.error);
             return {response:false, message:result.error, data:null}
         }
 
+        console.log('Creating manage user record...');
         await ManageUserModel.create({email:registerData.email, have_wallet:false, wallet_address:""});
-        const subject = i18n.__({phrase: "MGL Exchange: Account Created Sucessfully", locale: rawData.locale || "En"})
-        const body = i18n.__({phrase: "Your MGL Exchange account has been created sucessfully. Thank you.", locale: rawData.locale || "En"});
-        emailService.deliverEmail(rawData.email, subject, body);
         
+        console.log('Registration successful');
         return {response:true, message:"Success", data:null}
     };
 
@@ -293,13 +299,31 @@ class UserService {
             return {response:false, message:"Send data validation error", data:null}
         }
         const { email, password: pass } = rawData;
+        console.log('Attempting login for email:', email);
+        
         const user = await UserModel.findOne({ email });
+        console.log('User found:', user ? 'Yes' : 'No');
         if (!user) {
             return {response: false, message:"Unregistered user!", data:null}
         }
-        const isMatch = await bcrypt.compare(pass, user.password);
-        if (!isMatch) {
-            return {response:false, message:'Incorrect password!', data:null}
+        
+        // Add validation for password field
+        if (!user.password) {
+            console.error('Password field is missing for user:', email);
+            console.error('User object:', JSON.stringify(user, null, 2));
+            return {response: false, message:"Invalid user data. Please contact support.", data:null}
+        }
+
+        try {
+            console.log('Attempting password comparison');
+            const isMatch = await bcrypt.compare(pass, user.password);
+            console.log('Password match result:', isMatch);
+            if (!isMatch) {
+                return {response:false, message:'Incorrect password!', data:null}
+            }
+        } catch (error) {
+            console.error('Password comparison error:', error);
+            return {response:false, message:'Error during authentication. Please try again.', data:null}
         }
 
         // user matched!

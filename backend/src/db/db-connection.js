@@ -4,6 +4,7 @@ const mysql2 = require('mysql2');
 
 class DBConnection {
     constructor() {
+        console.log('Connecting to database:', process.env.DB_DATABASE);
         this.db = mysql2.createPool({
             host: process.env.DB_HOST,
             user: process.env.DB_USER,
@@ -17,6 +18,7 @@ class DBConnection {
     checkConnection() {
         this.db.getConnection((err, connection) => {
             if (err) {
+                console.error('Database connection error:', err);
                 if (err.code === 'PROTOCOL_CONNECTION_LOST') {
                     console.error('Database connection was closed.');
                 }
@@ -26,32 +28,23 @@ class DBConnection {
                 if (err.code === 'ECONNREFUSED') {
                     console.error('Database connection was refused.');
                 }
-            }
-            if (connection) {
+            } else {
+                console.log('Database connected successfully to:', process.env.DB_DATABASE);
                 connection.release();
             }
-            return
         });
     }
 
-    query = async (sql, values) => {
-        
+    query = async (sql, params) => {
         return new Promise((resolve, reject) => {
-            const callback = (error, result) => {
+            this.db.query(sql, params, (error, results) => {
                 if (error) {
+                    console.error('Query error:', error);
                     reject(error);
-                    return;
+                } else {
+                    resolve(results);
                 }
-                resolve(result);
-            }
-            // execute will internally call prepare and query
-            this.db.execute(sql, values, callback);
-        }).catch(err => {
-            const mysqlErrorList = Object.keys(HttpStatusCodes);
-            // convert mysql errors which in the mysqlErrorList list to http status code
-            err.status = mysqlErrorList.includes(err.code) ? HttpStatusCodes[err.code] : err.status;
-
-            throw err;
+            });
         });
     }
 }

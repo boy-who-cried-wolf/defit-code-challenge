@@ -5,8 +5,8 @@ const ETH_ACCOUNT_PATH = `m/44'/60'/0'`
 const Web3 = require('web3');
 const crypto = require('crypto');
 const algorithm = "aes-256-cbc";
-const initSeed = "MGLWalletInitKey";
-const secSeed = "MGLWalletSecurityWithSecurityKey";
+const initSeed = process.env.ENCRYPTION_IV || "MGLWalletInitKey";
+const secSeed = process.env.ENCRYPTION_KEY || "MGLWalletSecurityWithSecurityKey";
 const mainTokenList = require('./polygon.json')
 const testTokenList = require('./polygon_testnet.json')
 const dotenv = require('dotenv');
@@ -123,21 +123,31 @@ class Wallet {
     }
 
     encrypt(str) {
-        const initVector = Buffer.from(initSeed);
-        const securityKey = Buffer.from(secSeed);
-        const cipher = crypto.createCipheriv(algorithm, securityKey, initVector);
-        let encryptedKey = cipher.update(str, "utf-8", "hex");
-        encryptedKey += cipher.final("hex");
-        return encryptedKey
+        try {
+            const initVector = Buffer.from(initSeed);
+            const securityKey = Buffer.from(secSeed);
+            const cipher = crypto.createCipheriv(algorithm, securityKey, initVector);
+            let encryptedKey = cipher.update(str, "utf-8", "hex");
+            encryptedKey += cipher.final("hex");
+            return encryptedKey;
+        } catch (error) {
+            console.error('Encryption error:', error);
+            throw new Error('Encryption failed');
+        }
     }
 
     decrypt(str) {
-        const initVector = Buffer.from(initSeed);
-        const securityKey = Buffer.from(secSeed);
-        const decipher = crypto.createDecipheriv(algorithm, securityKey, initVector);
-        let decryptedKey = decipher.update(str, "hex", "utf-8");
-        decryptedKey += decipher.final("utf-8");
-        return decryptedKey
+        try {
+            const initVector = Buffer.from(initSeed);
+            const securityKey = Buffer.from(secSeed);
+            const decipher = crypto.createDecipheriv(algorithm, securityKey, initVector);
+            let decryptedKey = decipher.update(str, "hex", "utf-8");
+            decryptedKey += decipher.final("utf-8");
+            return decryptedKey;
+        } catch (error) {
+            console.error('Decryption error:', error);
+            throw new Error('Decryption failed');
+        }
     }
     
     async getTokenBalances(publicKey, assets) {
@@ -265,6 +275,17 @@ class Wallet {
         return account.address.toLowerCase()
     }
 
+    async getTokenBaseInfo(tokenAddr, network) {
+        try {
+            let contract = new this.web3.eth.Contract(minABI, tokenAddr);
+            let decimal = await contract.methods.decimals().call();
+            return { decimal };
+        } catch (error) {
+            console.error('Error getting token info:', error);
+            return { decimal: 18 }; // Default to 18 decimals if error
+        }
+    }
+
     async getTokenPriceInUsd(networkUrl, tokenAddr) {
         try {
             let network = networks[2];
@@ -311,7 +332,7 @@ class Wallet {
             }
     
             //console.log('base price', basePrice, tokenAddr, network.baseTokenAddr)
-            let {decimal} = await getTokenBaseInfo(tokenAddr, network.url);
+            let {decimal} = await this.getTokenBaseInfo(tokenAddr, network.url);
             let amount = await routerContract.methods.getAmountsOut(Math.pow(10,decimal)+"", [tokenAddr, network.baseTokenAddr]).call()
             //console.log('what is s', amount)
             return amount[1] / Math.pow(10, 18) * basePrice

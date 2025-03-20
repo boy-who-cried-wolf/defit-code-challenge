@@ -1,4 +1,3 @@
-
 const query = require('../db/db-connection');
 const { multipleColumnSet } = require('../utils/common.utils');
 const Role = require('../utils/userRoles.utils');
@@ -28,11 +27,16 @@ class UserModel {
             
             const sql = `SELECT * FROM ${this.tableName}
             WHERE ${columnSet}`;
+            console.log('Executing SQL query:', sql);
+            console.log('With values:', values);
+            
             const result = await query(sql, [...values]);
+            console.log('Query result:', result);
 
             // return back the first row (user)
             return result[0];
         } catch(error) {
+            console.error('Database error in findOne:', error);
             return {error:error.sqlMessage};
         }
     }

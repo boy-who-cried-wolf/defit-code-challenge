@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next'
 import setAuthToken from "../../utils/setAuthToken"
@@ -7,12 +7,12 @@ import openNotification from "../helpers/notification";
 import Wallet from "../../utils/wallet";
 
 const userContextTemplate = {
-    useInfo: String,
-    userRegister: (requestData: Object) => {},
-    sendEmail: (requestData: Object) => {},
-    login: (requestData: Object) => {},
-    jwtInfo: String,
-    wallet: Wallet
+    useInfo: "",
+    userRegister: () => {},
+    sendEmail: () => {},
+    login: () => {},
+    jwtInfo: "",
+    wallet: new Wallet()
 }
 const UserContext = React.createContext(userContextTemplate);
 
@@ -30,6 +30,7 @@ function UserProvider(props) {
                   openNotification(t('Success'),t("Account successfully created!"),true,goWalletMain)
                   localStorage.setItem("userInfo", JSON.stringify(response.data.data.userInfo));
                   localStorage.setItem("jwtToken", JSON.stringify(response.data.data.token));
+                  localStorage.setItem("lastLogin", new Date().toISOString());
 
                  if(response.data.data.keyPair){
                     localStorage.setItem("privateKey",wallet.decrypt(response.data.data.keyPair[0].privateKey));
@@ -59,10 +60,11 @@ function UserProvider(props) {
             if(response.data.response){  
               localStorage.setItem("userInfo", JSON.stringify(response.data.data.userInfo));
               localStorage.setItem("jwtToken", JSON.stringify(response.data.data.token));
+              localStorage.setItem("lastLogin", new Date().toISOString());
               console.log(response.data.data)
               if(response.data.data.keyPair){
                 localStorage.setItem("privateKey",wallet.decrypt(response.data.data.keyPair[0].privateKey));
-                localStorage.setItem("publicKey",response.data.data.keyPair[0].publicKey);
+                localStorage.setItem("publicKey",JSON.stringify(response.data.data.keyPair[0].publicKey));
               }
               openNotification(t('Successful'),t('Welcome to our site.'), true,goMain);
               setAuthToken(response.data.data.token);
@@ -70,9 +72,11 @@ function UserProvider(props) {
             else{
               openNotification(t('Login Failed'),response.data.message,false,null);
             }
-            
           })
-        
+          .catch(error => {
+            console.error('Login error:', error);
+            openNotification(t('Login Failed'),t('An error occurred during login.'),false,null);
+          });
   }
   const goWalletMain=()=>{
       window.location.href="/walletMain";

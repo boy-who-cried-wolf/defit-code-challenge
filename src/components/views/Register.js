@@ -33,41 +33,18 @@ function Register(props) {
   }, []);
 
   const login=()=>{
-    
     return form.validateFields()
             .then((values) => {
               console.log(userData)
               userData.login({
-                email:email,
-                password:password
+                email: email,
+                password: password,
+                locale: (localStorage.getItem('locale') || "Mn")
               });
-              // axios.post(serverUrl+"users/login",{
-              //   email:email,
-              //   password:password
-              // }).then(response=>{
-              //   if(response.data.response){
-                  
-              //     // setMessage({style:'text-green-500',val:true,data:"Successful! Welcome to our site."});
-              //     localStorage.setItem("userInfo", JSON.stringify(response.data.data.userInfo));
-              //     localStorage.setItem("jwtToken", JSON.stringify(response.data.data.token));
-              //     console.log(response.data.data)
-              //     if(response.data.data.keyPair){
-              //       localStorage.setItem("privateKey",wallet.decrypt(response.data.data.keyPair[0].privateKey));
-              //       localStorage.setItem("publicKey",response.data.data.keyPair[0].publicKey);
-              //     }
-              //     openNotification(t('Successful'),t('Welcome to our site.'), true,goMain);
-              //     setAuthToken(response.data.data.token);
-              //   }
-              //   else{
-              //     openNotification(t('Login Failed'),response.data.message,false);
-              //     // setMessage({style:'text-red-500',val:false,data:"Login failed! "})
-              //   }
-                
-              // })
-
-
             })
-            .catch((errorInfo) => {});           
+            .catch((errorInfo) => {
+              console.log('Failed:', errorInfo);
+            });           
   }
   const logout=()=>{
     localStorage.removeItem("user");
