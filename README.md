@@ -1,24 +1,6 @@
 # DeFi Wallet Project
 
-This is a test project demonstrating a DeFi wallet implementation. **This project is for educational purposes only and should not be used in production without implementing proper security measures.**
-
-## ⚠️ Security Notice
-
-This project currently contains several security vulnerabilities that must be addressed before any production use:
-
-1. **Private Key Storage**
-   - Currently uses hardcoded encryption keys
-   - Implements basic AES-256-CBC encryption
-   - No key derivation or salting
-
-2. **Required Security Improvements**
-   - Implement PBKDF2 or Argon2 for key derivation
-   - Use hardware security modules for key storage
-   - Add multi-factor authentication
-   - Implement proper session management
-   - Add rate limiting for sensitive operations
-   - Use secure environment variables for all secrets
-   - Implement proper key rotation mechanisms
+A DeFi wallet implementation with support for multiple networks including Polygon and BSC.
 
 ## 🚀 Getting Started
 
@@ -37,30 +19,43 @@ This project currently contains several security vulnerabilities that must be ad
    npm run dev
    ```
 
-## 🔒 Security Best Practices
+## 🌐 Supported Networks
 
-Before deploying to production:
+- Polygon Mainnet
+- Polygon Testnet
+- BSC Mainnet
+- BSC Testnet
 
-1. Generate secure encryption keys:
-   ```bash
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   ```
+## 🛠️ Development
 
-2. Use environment variables for all sensitive data
-3. Implement proper key derivation
-4. Add rate limiting
-5. Set up proper authentication
-6. Use HTTPS
-7. Implement proper error handling
-8. Add logging and monitoring
+### Prerequisites
+- Node.js (v14 or higher)
+- MySQL Database
+- Firebase Account (for authentication)
+
+### Environment Variables
+Required environment variables are listed in `.env.example`. Make sure to set up:
+- Database credentials
+- Security keys
+- JWT secret
+- Email configuration
+- Firebase configuration
+- API keys
+
+## 🚀 Deployment
+
+The project can be deployed on Render.com using the provided `render.yaml` configuration:
+
+1. Push your code to GitHub
+2. Create a new account on [Render.com](https://render.com)
+3. Click "New +" and select "Blueprint"
+4. Connect your GitHub repository
+5. Configure environment variables in Render dashboard
+6. Deploy both frontend and backend services
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## ⚠️ Disclaimer
-
-This is a test project and should not be used in production without implementing proper security measures. The current implementation is not secure and should only be used for educational purposes.
 ```
 npm install 
 ```
