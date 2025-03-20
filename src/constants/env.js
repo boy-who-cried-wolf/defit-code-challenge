@@ -1,4 +1,8 @@
-export const SERVER_URL = "http://localhost:5000/api/"
+// API URL based on environment
+export const SERVER_URL = process.env.REACT_APP_API_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://defi-wallet-api.onrender.com/'  // Update this with your actual Render.com backend URL
+    : 'http://localhost:5000/');
 // export const SERVER_URL = "https://mglcoin.io/api/"
 // export const SERVER_URL = "http://10.10.12.157:5000/api/"
 
