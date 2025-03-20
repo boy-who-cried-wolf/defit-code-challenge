@@ -42,17 +42,6 @@ Required environment variables are listed in `.env.example`. Make sure to set up
 - Firebase configuration
 - API keys
 
-## 🚀 Deployment
-
-The project can be deployed on Render.com using the provided `render.yaml` configuration:
-
-1. Push your code to GitHub
-2. Create a new account on [Render.com](https://render.com)
-3. Click "New +" and select "Blueprint"
-4. Connect your GitHub repository
-5. Configure environment variables in Render dashboard
-6. Deploy both frontend and backend services
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
